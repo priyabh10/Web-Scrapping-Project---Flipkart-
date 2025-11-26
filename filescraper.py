@@ -71,7 +71,7 @@ PRICE_SELECTORS = {
 def send_email_alert(product_name, old_price, new_price):
     sender = "priyankaabc1004@gmail.com"
     receiver = "priyanka.bh104@gmail.com"
-    password = "eqbu saxh ngzc freh" 
+    password = "**** **** **** ****" 
     message = f"""\
 Subject: Price Drop Alert!
 
@@ -93,57 +93,7 @@ Hurry before it increases!
         print(f"[EMAIL ERROR] Could not send email: {e}")
 
 
-# -----------------------
-# SCRAPE FUNCTION
-# -----------------------
-# def scrape_flipkart(category, pages=3):
 
-#     all_products = []
-
-#     for page in range(1, pages + 1):
-#         try:
-#             url = f"https://www.flipkart.com/search?q={category}&page={page}"
-#             print(f"\nScraping Page {page}: {url}")
-
-#             response = requests.get(url)
-#             soup = BeautifulSoup(response.text, "html.parser")
-
-#             # extract product names
-#             names = []
-#             try:
-#                 for selector in NAME_SELECTORS[category]:
-#                     names.extend([tag.get_text(strip=True) for tag in soup.select(selector)])
-#             except Exception as e:
-#                 print(f"[WARNING] Name selector failed for {category} page {page}: {e}")
-#                 continue  # skip page
-#                 # extract prices
-#             prices = []
-#             try:
-#                 for selector in PRICE_SELECTORS[category]:
-#                     for tag in soup.select(selector):
-#                         p = tag.get_text(strip=True).replace("₹", "").replace(",", "")
-#                         if p.isdigit():
-#                             prices.append(int(p))
-#             except Exception as e:
-#                 print(f"[WARNING] Price selector failed for {category} page {page}: {e}")
-#                 continue  # skip page
-#             for name, price in zip(names, prices):
-#                 try:
-#                     name = name.get_text(strip=True)
-#                     price_raw = price.get_text(strip = True)
-#                     price = price_raw.replace("₹", "").replace(",","")
-
-#                     if price.isdigit():
-#                         all_products.append([category, name, int(price)])
-#                 except Exception as e:
-#                     print(f"[SKIP PRODUCT] Error parsing product on {category}: {e}")
-#                     continue  # skip this product
-
-#         except Exception as e:
-#             print(f"[SKIP PAGE] Error scraping {category} page {page}: {e}")
-#             continue
-
-#     return all_products
 def scrape_category(category):
     products = []
 
@@ -268,32 +218,3 @@ if __name__ == "__main__":
             print(f"[CRITICAL ERROR] Script crashed: {e}")
             print("Retrying in 1 minute...")
             time.sleep(60)  # retry after 60 seconds
-
-
-
-
-# # -----------------------
-# # MAIN PROGRAM
-# # -----------------------
-# user_input = int(input("Enter category number (1-9): "))
-
-# selected_category = category_choice[user_input]
-# threshold_price = thresholds[selected_category]
-
-# print("\nSelected Category:", selected_category)
-# print("Threshold Price:", threshold_price)
-
-# url = f"https://www.flipkart.com/search?q={selected_category}"
-# print("Category URL:", url)
-
-# products = scrape_flipkart(selected_category, pages=3)
-
-# print("\n========== SCRAPED PRODUCTS ==========\n")
-
-# for name, price in products:
-#     print(f"{name} - ₹{price}")
-
-#     # price alert
-#     if price <= threshold_price:
-#         print(f"🔥 ALERT: Price dropped below threshold ({threshold_price}) → ₹{price}")
-#         print("-------------------------------------")
