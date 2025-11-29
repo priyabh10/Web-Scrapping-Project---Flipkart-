@@ -41,27 +41,27 @@ thresholds = {
 }
 
 NAME_SELECTORS = {
-    "electronics": ["a.wjcEIp"],
-    "tv_and_appliances": ["a.KzDlHZ"],
-    "men": ["a.wjcEIp"],
-    "women": ["a.WKTcLC.BwBZTg", "a.WKTcLC"],
-    "baby_and_kids": ["a.wjcEIp"],
-    "beauty_and_personal_care": ["a.wjcEIp"],
-    "home_and_furniture": ["a.wjcEIp"],
-    "sports": ["a.wjcEIp"],
-    "books": ["a.wjcEIp"]
+    "electronics": ["a.pIpigb"],
+    "tv_and_appliances": ["a.pIpigb"],
+    "men": ["a.atJtCj Qum9aC","a.atJtCj"],
+    "women": ["a.atJtCj","a.atJtCj Qum9aC"],
+    "baby_and_kids": ["a.pIpigb"],
+    "beauty_and_personal_care": ["a.pIpigb"],
+    "home_and_furniture": ["a.pIpigb"],
+    "sports": ["a.pIpigb"],
+    "books": ["a.pIpigb"]
 }
 
 PRICE_SELECTORS = {
-    "electronics": ["div.Nx9bqj"],
-    "tv_and_appliances": ["div.Nx9bqj"],
-    "men": ["div.Nx9bqj"],
-    "women": ["div.Nx9bqj"],
-    "baby_and_kids": ["div.Nx9bqj"],
-    "beauty_and_personal_care": ["div.Nx9bqj"],
-    "home_and_furniture": ["div.Nx9bqj"],
-    "sports": ["div.Nx9bqj"],
-    "books": ["div.Nx9bqj"]
+    "electronics": ["div.hZ3P6w"],
+    "tv_and_appliances": ["div.hZ3P6w"],
+    "men": ["div.hZ3P6w"],
+    "women": ["div.hZ3P6w"],
+    "baby_and_kids": ["div.hZ3P6w"],
+    "beauty_and_personal_care": ["div.hZ3P6w"],
+    "home_and_furniture": ["div.hZ3P6w"],
+    "sports": ["div.hZ3P6w"],
+    "books": ["div.hZ3P6w"]
 
 }
 
@@ -218,3 +218,4 @@ if __name__ == "__main__":
             print(f"[CRITICAL ERROR] Script crashed: {e}")
             print("Retrying in 1 minute...")
             time.sleep(60)  # retry after 60 seconds
+
