@@ -65,6 +65,18 @@ PRICE_SELECTORS = {
 
 }
 
+# -------------------------
+# Load config.json
+# -------------------------
+with open("config.json", "r", encoding="utf-8") as f:
+    CONFIG = json.load(f)
+
+SENDER = CONFIG["email_sender"]
+PASSWORD = CONFIG["email_password"]
+RECEIVER = CONFIG["email_receiver"]
+DROP_THRESHOLD = CONFIG["price_drop_threshold"]
+RUN_INTERVAL = CONFIG["run_interval_hours"]
+
 # -----------------------------------------------------------
 # SEND EMAIL ALERT
 # -----------------------------------------------------------
@@ -94,128 +106,101 @@ Hurry before it increases!
 
 
 
-def scrape_category(category):
-    products = []
+def scrape_flipkart(category, pages=3):
 
-    for page in range(1, 4):   # scrape 3 pages
+    all_products = []
+
+    for page in range(1, pages + 1):
         try:
             url = f"https://www.flipkart.com/search?q={category}&page={page}"
-            print("Scraping:", url)
+            print(f"\nScraping Page {page}: {url}")
 
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-
+            response = requests.get(url)
             soup = BeautifulSoup(response.text, "html.parser")
 
-            # Try to get product name selectors safely
+            # 1️⃣ Collect TAGS (not text)
             name_tags = []
-            try:
-                for selector in NAME_SELECTORS.get(category, []):
-                    name_tags.extend(soup.select(selector))
-            except Exception as e:
-                print(f"[WARNING] Name selector failed for {category} page {page}: {e}")
-                continue  # skip page
-            
-            # Try to get price selectors safely
+            for selector in NAME_SELECTORS.get(category, []):
+                name_tags.extend(soup.select(selector))
+
             price_tags = []
-            try:
-                for selector in PRICE_SELECTORS.get(category, []):
-                    price_tags.extend(soup.select(selector))
-            except Exception as e:
-                print(f"[WARNING] Price selector failed for {category} page {page}: {e}")
-                continue  # skip page
+            for selector in PRICE_SELECTORS.get(category, []):
+                price_tags.extend(soup.select(selector))
 
-            # Loop through products safely
-            for name_tag, price_tag in zip(name_tags, price_tags):
+            # 2️⃣ Length check
+            limit = min(len(name_tags), len(price_tags))
+
+            for i in range(limit):
                 try:
-                    name = name_tag.get_text(strip=True)
-                    price_raw = price_tag.get_text(strip=True)
-                    price = price_raw.replace("₹", "").replace(",", "")
+                    # 3️⃣ Extract NAME from <a>
+                    name = name_tags[i].get_text(strip=True)
 
-                    if price.isdigit():
-                        products.append([category, name, int(price)])
+                    # 4️⃣ Extract PRICE from <div>
+                    price_raw = price_tags[i].get_text(strip=True)
+                    price = int(price_raw.replace("₹", "").replace(",", ""))
+
+                    # 5️⃣ Extract link (only <a> has href)
+                    href = name_tags[i].get("href")
+                    link = f"https://www.flipkart.com{href}" if href else ""
+
+                    all_products.append([category, name, price, link])
+
                 except Exception as e:
-                    print(f"[SKIP PRODUCT] Error parsing product on {category}: {e}")
-                    continue  # skip this product
+                    print(f"[SKIP PRODUCT] {e}")
+                    continue
 
         except Exception as e:
             print(f"[SKIP PAGE] Error scraping {category} page {page}: {e}")
             continue
 
-    return products
+    return all_products
 
 # -----------------------------------------------------------
 # SAVE CSV + CHECK PRICE DROP
 # -----------------------------------------------------------
-def save_data(products):
+def save_data(all_products):
     filename = "flipkart_prices.csv"
 
     old_data = {}
 
-    # Load previous data
+    # Load old price data
     try:
-        with open(filename, "r", newline="", encoding="utf-8") as file:
-            reader = csv.reader(file)
+        with open(filename, "r", encoding="utf-8") as f:
+            reader = csv.reader(f)
             next(reader)
             for row in reader:
                 old_data[row[1]] = int(row[2])
     except FileNotFoundError:
         pass
 
-    # Write new CSV (overwrite)
-    with open(filename, "w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow(["Category", "Product Name", "Price"])
+    # Remove duplicates by link
+    unique = {}
+    for cat, price, link, name in all_products:
+        unique[name] = (cat, price, link)
 
-        for category, name, price in products:
-            writer.writerow([category, name, price])
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Category", "name", "price", "link"])
 
-            # Compare prices
-            if name in old_data:
-                old_price = old_data[name]
-                if price < old_price:
-                    send_email_alert(name, old_price, price)
+        for name, (cat, price, link) in unique.items():
+            writer.writerow([cat,price, link, name])
+
+            if name in old_data and price < old_data[name]:
+                send_email_alert(name, old_data[name], price)
 
     print("CSV updated:", filename)
 
-
-# -----------------------------------------------------------
-# RUN EVERY 12 HOURS
-# -----------------------------------------------------------
 def main():
-    while True:
-        print("\n================================================")
-        print("⌛ Running Flipkart Scraper:", datetime.now())
-        print("================================================")
+    all_products = []
 
-        all_products = []
+    for cat_id, category in category_choice.items():
+        prod = scrape_flipkart(category)
+        all_products.extend(prod)
 
-        for cat_id, category in category_choice.items():
-            cat_products = scrape_category(category)
-            all_products.extend(cat_products)
-
-
-        save_data(all_products)
-
-        print("Sleeping for 12 hours...")
-        time.sleep(12 * 60 * 60)  # 12 hours
-
+    save_data(all_products)
 
 if __name__ == "__main__":
-    
-    while True:
-        try:
-            print("\n------------------------------")
-            print(" Running Flipkart Scraper...")
-            print("------------------------------\n")
+    main()
 
-            main()  # your function that scrapes everything
 
-            print("\nWaiting 12 hours before next run...\n")
-            time.sleep(12 * 60 * 60)  # 12 hours
-
-        except Exception as e:
-            print(f"[CRITICAL ERROR] Script crashed: {e}")
-            print("Retrying in 1 minute...")
-            time.sleep(60)  # retry after 60 seconds
 
