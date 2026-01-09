@@ -102,7 +102,7 @@ RUN_INTERVAL = CONFIG["run_interval_hours"]
 def send_email_alert(name, old_price, price,link):
     sender = "priyankaabc1004@gmail.com"
     receiver = "priyanka.bh104@gmail.com"
-    password = "eqbu saxh ngzc freh" 
+    password = "" 
     message = f"""\
 Subject: Price Drop Alert!
 
