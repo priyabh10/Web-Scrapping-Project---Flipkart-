@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flipkart Scraper</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">📦 Flipkart Product Analytics Dashboard</h2>
+
+    <!-- Total Records -->
+    <div class="alert alert-info">
+        <strong>Total Records:</strong> {{ total_records }}
+    </div>
+
+    <!-- Search Bar -->
+    <form method="get" action="/">
+        <div class="input-group mb-3">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search by product name..."
+                   value="{{ search_query }}">
+            <button class="btn btn-primary">Search</button>
+        </div>
+    </form>
+
+    <form action="/scrape" method="POST">
+    <button class="btn btn-primary">Run Scraper</button>
+    </form>
+
+
+
+    <!-- Add Alert Button -->
+    <div class="mb-3">
+        <a href="/alert" class="btn btn-warning">Email Alert</a>
+    </div>
+
+    {% if new_alerts %}
+    <div class="alert alert-danger">
+        <h5>⚠ New Price Drop Alerts ({{ new_alerts|length }})</h5>
+
+        <ul>
+            {% for a in new_alerts %}
+            <li>
+                <strong>{{ a.product_name }}</strong> dropped from 
+                ₹{{ a.old_price }} → ₹{{ a.new_price }}
+                <a href="{{ a.link }}" target="_blank">View</a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <a href="/alert" class="btn btn-sm btn-danger">View Full Alert History</a>
+    </div>
+    {% endif %}
+
+
+    <!-- Products Table -->
+    <table class="table table-bordered table-hover bg-white">
+        <thead class="table-dark">
+        <tr>
+            <th>category</th>
+            <th>Price</th>
+            <th>name</th>
+            <th>link</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.Category }}</td>
+            <td>{{ product.price }}</td>
+            <td>{{ product.name }}</td>
+            <td><a href="{{ product.link }}" target="_blank">View</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
+
+
+
+
